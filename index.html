@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEIDG Scraper - Zarządzanie danymi firm</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="header-brand">
+                <i class="fas fa-database"></i>
+                <span>CEIDG Scraper</span>
+            </div>
+            <div class="header-status">
+                <div class="status-indicator">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Gotowy</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="scraping">
+                            <i class="fas fa-spider"></i>
+                            <span>Scraping</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="data">
+                            <i class="fas fa-table"></i>
+                            <span>Dane</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="statistics">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Statystyki</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Ustawienia</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section class="content-section active" id="dashboard">
+                <div class="section-header">
+                    <h1>Dashboard</h1>
+                    <div class="section-actions">
+                        <button class="btn btn--primary" id="startScrapingBtn">
+                            <i class="fas fa-play"></i>
+                            Rozpocznij Scraping
+                        </button>
+                        <button class="btn btn--outline" id="exportDataBtn">
+                            <i class="fas fa-download"></i>
+                            Eksportuj Dane
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-value" id="totalCompanies">1,247</div>
+                            <div class="stat-label">Łączna liczba firm</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-value" id="companiesWithEmail">923</div>
+                            <div class="stat-label">Firmy z emailem</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-value" id="companiesWithPhone">1,156</div>
+                            <div class="stat-label">Firmy z telefonem</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-value" id="todayCompanies">45</div>
+                            <div class="stat-label">Dzisiejsze firmy</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-container" style="position: relative; height: 400px;">
+                        <h3>Trend tygodniowy</h3>
+                        <canvas id="weeklyTrendChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 400px;">
+                        <h3>Top województwa</h3>
+                        <canvas id="voivodeshipChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scraping Section -->
+            <section class="content-section" id="scraping">
+                <div class="section-header">
+                    <h1>Panel Scrapingu</h1>
+                </div>
+
+                <div class="scraping-layout">
+                    <div class="scraping-config">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Konfiguracja</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="form-group">
+                                    <label class="form-label" for="dateFrom">Data od:</label>
+                                    <input type="date" id="dateFrom" class="form-control" value="2025-09-01">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="dateTo">Data do:</label>
+                                    <input type="date" id="dateTo" class="form-control" value="2025-09-09">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="voivodeshipFilter">Województwo:</label>
+                                    <select id="voivodeshipFilter" class="form-control">
+                                        <option value="">Wszystkie</option>
+                                        <option value="mazowieckie">Mazowieckie</option>
+                                        <option value="slaskie">Śląskie</option>
+                                        <option value="wielkopolskie">Wielkopolskie</option>
+                                        <option value="malopolskie">Małopolskie</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" id="requireEmail" checked>
+                                        <span class="checkmark"></span>
+                                        Wymagaj email
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" id="requirePhone">
+                                        <span class="checkmark"></span>
+                                        Wymagaj telefon
+                                    </label>
+                                </div>
+                                <button class="btn btn--primary btn--full-width" id="runScrapingBtn">
+                                    <i class="fas fa-play"></i>
+                                    Uruchom Scraping
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="scraping-progress">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Postęp</h3>
+                                <div class="scraping-status" id="scrapingStatus">
+                                    <span class="status status--info">Oczekuje</span>
+                                </div>
+                            </div>
+                            <div class="card__body">
+                                <div class="progress-bar" id="progressBar">
+                                    <div class="progress-fill" id="progressFill"></div>
+                                </div>
+                                <div class="progress-stats">
+                                    <span id="progressText">0 / 0</span>
+                                    <span id="progressPercent">0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Logi</h3>
+                                <button class="btn btn--outline btn--sm" id="clearLogsBtn">Wyczyść</button>
+                            </div>
+                            <div class="card__body">
+                                <div class="logs-container" id="logsContainer">
+                                    <div class="log-entry log-info">System gotowy do scrapingu</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Section -->
+            <section class="content-section" id="data">
+                <div class="section-header">
+                    <h1>Przeglądarka Danych</h1>
+                    <div class="section-actions">
+                        <button class="btn btn--outline" id="exportCsvBtn">
+                            <i class="fas fa-file-csv"></i>
+                            Eksportuj CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-filters">
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <input type="text" placeholder="Wyszukaj firmę..." class="form-control" id="searchInput">
+                        </div>
+                        <div class="filter-group">
+                            <select class="form-control" id="voivodeshipDataFilter">
+                                <option value="">Wszystkie województwa</option>
+                                <option value="Mazowieckie">Mazowieckie</option>
+                                <option value="Śląskie">Śląskie</option>
+                                <option value="Wielkopolskie">Wielkopolskie</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <select class="form-control" id="contactFilter">
+                                <option value="">Wszystkie</option>
+                                <option value="email">Z emailem</option>
+                                <option value="phone">Z telefonem</option>
+                                <option value="both">Z emailem i telefonem</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nazwa firmy</th>
+                                <th>NIP</th>
+                                <th>Email</th>
+                                <th>Telefon</th>
+                                <th>Miasto</th>
+                                <th>Województwo</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-container">
+                    <div class="pagination" id="pagination">
+                    </div>
+                    <div class="pagination-info">
+                        <span id="paginationInfo">Pokazuje 1-10 z 1247 wyników</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics Section -->
+            <section class="content-section" id="statistics">
+                <div class="section-header">
+                    <h1>Szczegółowe Statystyki</h1>
+                </div>
+
+                <div class="statistics-grid">
+                    <div class="chart-container" style="position: relative; height: 300px;">
+                        <h3>Rozkład według województw</h3>
+                        <canvas id="detailedVoivodeshipChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 300px;">
+                        <h3>Kontakty</h3>
+                        <canvas id="contactChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container" style="position: relative; height: 400px;">
+                    <h3>Trend miesięczny</h3>
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section class="content-section" id="settings">
+                <div class="section-header">
+                    <h1>Ustawienia</h1>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card__header">
+                            <h3>Konfiguracja API</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="form-group">
+                                <label class="form-label" for="apiKey">Klucz API CEIDG:</label>
+                                <input type="password" id="apiKey" class="form-control" placeholder="Wprowadź klucz API">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="apiEndpoint">Endpoint API:</label>
+                                <input type="url" id="apiEndpoint" class="form-control" value="https://datastore.ceidg.gov.pl/CEIDG.DataStore/Services/NewDataStoreProvider.svc">
+                            </div>
+                            <button class="btn btn--primary">Zapisz konfigurację</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card__header">
+                            <h3>Filtrowanie</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="form-group">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="defaultRequireEmail" checked>
+                                    <span class="checkmark"></span>
+                                    Domyślnie wymagaj email
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="defaultRequirePhone">
+                                    <span class="checkmark"></span>
+                                    Domyślnie wymagaj telefon
+                                </label>
+                            </div>
+                            <button class="btn btn--primary">Zapisz ustawienia</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card__header">
+                            <h3>Automatyzacja</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="form-group">
+                                <label class="form-label" for="scrapingInterval">Interval scrapingu:</label>
+                                <select id="scrapingInterval" class="form-control">
+                                    <option value="manual">Ręcznie</option>
+                                    <option value="daily" selected>Codziennie</option>
+                                    <option value="weekly">Tygodniowo</option>
+                                    <option value="monthly">Miesięcznie</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="autoBackup" checked>
+                                    <span class="checkmark"></span>
+                                    Automatyczne kopie zapasowe
+                                </label>
+                            </div>
+                            <button class="btn btn--primary">Zapisz harmonogram</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card__header">
+                            <h3>Backup</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="backup-info">
+                                <p>Ostatnia kopia zapasowa: <strong>09.09.2025, 20:30</strong></p>
+                                <p>Rozmiar bazy danych: <strong>2.3 MB</strong></p>
+                            </div>
+                            <div class="backup-actions">
+                                <button class="btn btn--outline">Utwórz kopię zapasową</button>
+                                <button class="btn btn--outline">Przywróć z kopii</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal hidden" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Eksportuj dane</h3>
+                <button class="modal-close" id="closeExportModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Wybierz format eksportu danych:</p>
+                <div class="export-options">
+                    <button class="btn btn--primary" id="exportCsvModal">CSV</button>
+                    <button class="btn btn--outline" id="exportJsonModal">JSON</button>
+                    <button class="btn btn--outline" id="exportXmlModal">XML</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
