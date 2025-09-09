@@ -1489,3 +1489,9 @@ body {
 .text-error { color: var(--color-error); }
 .text-warning { color: var(--color-warning); }
 .text-info { color: var(--color-info); }
+.section.hidden { display: none; }
+
+#sidebar.collapsed {
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
