@@ -1,18 +1,16 @@
+// Główne dane aplikacji
 const appData = {
-  // Pusta tablica firm – brak danych testowych
   companies: [],
-
-  // Statystyki na start
   statistics: {
     total: 0,
     with_email: 0,
     with_phone: 0,
-    today: 0
+    today: 0,
+    yesterday: 0,
+    weekly: 0
   },
-
-  // Konfiguracja (przykładowe wartości – dostosuj według potrzeb)
   config: {
-    api_key: "", // Twój klucz CEIDG
+    api_key: "",
     api_endpoint: "https://datastore.ceidg.gov.pl/CEIDG.DataStore/Services/NewDataStoreProvider.svc",
     require_email: true,
     require_phone: false,
@@ -22,13 +20,13 @@ const appData = {
   }
 };
 
-// Funkcja inicjalizująca Dashboard
+// Inicjalizacja Dashboard
 function initDashboard() {
   updateStatisticsDisplay();
   initCharts();
 }
 
-// Aktualizacja liczb w panelu statystyk
+// Aktualizacja statystyk na Dashboardzie
 function updateStatisticsDisplay() {
   document.getElementById("stat-total").textContent = appData.statistics.total;
   document.getElementById("stat-email").textContent = appData.statistics.with_email;
@@ -36,62 +34,46 @@ function updateStatisticsDisplay() {
   document.getElementById("stat-today").textContent = appData.statistics.today;
 }
 
-// Inicjalizacja wykresów (puste dane)
+// Inicjalizacja wykresów (Chart.js, puste dane)
 function initCharts() {
-  const ctx = document.getElementById("dashboardChart").getContext("2d");
-  if(window.dashboardChartInstance) {
-    window.dashboardChartInstance.destroy();
-  }
-  window.dashboardChartInstance = new Chart(ctx, {
+  const ctx = document.getElementById("dashboardChart")?.getContext("2d");
+  if (!ctx) return;
+  new Chart(ctx, {
     type: "bar",
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: "Nowe firmy dzisiaj",
-          data: [],
-          backgroundColor: "#4169E1"
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      scales: { y: { beginAtZero: true } }
-    }
+    data: { labels: [], datasets: [{ label: "Nowe firmy dzisiaj", data: [], backgroundColor: "#4169E1" }] },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
   });
 }
 
-// Funkcja obsługująca przełączanie zakładek
+// Obsługa nawigacji i responsywnego menu
 function setupNavigation() {
-  document.querySelectorAll(".nav-link").forEach(link => {
-    link.addEventListener("click", () => {
-      const section = link.getAttribute("data-section");
-      // Ukryj wszystkie sekcje
-      document.querySelectorAll(".section").forEach(sec => sec.classList.add("hidden"));
-      // Pokaż wybraną
-      document.getElementById(section).classList.remove("hidden");
-      // Podświetl aktywny link
-      document.querySelectorAll(".nav-link").forEach(n => n.classList.remove("active"));
+  const links = document.querySelectorAll(".nav-link");
+  const sections = document.querySelectorAll(".section");
+  links.forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      // Aktywna zakładka
+      links.forEach(l => l.classList.remove("active"));
       link.classList.add("active");
-      // Jeśli to sekcja statystyk, odśwież dane
-      if(section === "statistics-section") {
-        updateStatisticsDisplay();
-        // Jeżeli masz wizualizacje, odśwież je tutaj
+      // Pokaż tylko odpowiednią sekcję
+      const target = link.getAttribute("data-section");
+      sections.forEach(sec => {
+        if (sec.id === target) sec.classList.remove("hidden");
+        else sec.classList.add("hidden");
+      });
+      // Jeśli mobile: zamknij sidebar
+      if (window.innerWidth < 768) {
+        document.getElementById("sidebar").classList.add("collapsed");
       }
     });
   });
+  // Hamburger toggle
+  document.getElementById("menuToggle").addEventListener("click", () => {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+  });
 }
 
-// Funkcja odświeżająca dane (np. po kliknięciu „Odśwież dane”)
-function refreshData() {
-  // Tu dodaj kod do pobierania danych z API CEIDG i aktualizacji appData
-  // np. fetch lub AJAX
-  // Dla przykładu można dodać symulację:
-  // appData.statistics.total = nowe dane
-  // updateStatisticsDisplay();
-}
-
-// Inicjalizacja wszystkiego po załadowaniu strony
+// Init po załadowaniu dokumentu
 document.addEventListener("DOMContentLoaded", () => {
   setupNavigation();
   initDashboard();
